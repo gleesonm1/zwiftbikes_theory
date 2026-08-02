@@ -143,7 +143,8 @@ if page != "Speed Calculator":
     )
 
     with col2:
-        st.title("Common Bike Comparisons")
+        st.subheader("Common Bike Comparisons")
+        level_label = st.selectbox("Upgrade Level", LEVEL_LABELS, index=5, key=f"b_level")
 
 
     st.info(
