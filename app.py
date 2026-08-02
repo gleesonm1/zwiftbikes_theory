@@ -147,8 +147,11 @@ if page != "Speed Calculator":
         st.caption("This compares your setup on the left to the performanc of the Zwift Carbon frame (level 0) with Zwift 32 mm Carbon wheels alongside other common frames (with standard Zwift 32 mm Carbon wheels) at a selected upgrade level.")
         
         ZC_km, _, _ = calc_distance(power, gradient, STANDARD_FRAME_ID, STANDARD_WHEEL_ID, STANDARD_LEVEL, h1, w1, bikes_by_key, crr, 3600)
-        st.text(f"Distance covered in 1 hour on level 0 Zwift Carbon frame with Zwift 32 mm Carbon wheels: {ZC_km:.2f} km")
+        st.text(f"Distance covered in 1 hour on level 0 Zwift Carbon frame with Zwift 32 mm Carbon wheels: {ZC_km:.2f} km \nNow we will calculate the difference in the time required to travel the same distance for various other frames (i.e., time saved or lost compared to this standard set up).")
         
+        YOUR_SETUP_s, _, _ = calc_time_to_distance(power, gradient, frame1, wheel1, level1, h1, w1, bikes_by_key, crr, ZC_km)
+
+        st.text(f"Your set up covers the same distance in f{YOUR_SETUP_s} seconds, or {3600 - YOUR_SETUP_s} seconds faster than the standard level 0 Zwift Carbon.")
         level_label = st.selectbox("Upgrade Level", LEVEL_LABELS, index=5, key=f"b_level")
 
         
