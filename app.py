@@ -148,7 +148,7 @@ if page != "Speed Calculator":
         level_label = st.selectbox("Upgrade Level", LEVEL_LABELS, index=5, key=f"b_level")
 
         ZC_km = calc_distance(power, gradient, STANDARD_FRAME_ID, STANDARD_WHEEL_ID, STANDARD_LEVEL, h1, w1, bikes_by_key, crr, 3600)
-        st.print(ZC_km)
+        st.text(ZC_km)
 
     st.info(
         "Bike comparison — coming soon. The main aim is to recreate the ZI bike"
