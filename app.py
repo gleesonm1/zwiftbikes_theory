@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 import requests
 from physics import physics
 from physics.physics import calc_speed
@@ -67,6 +68,11 @@ wheel_label = lambda w: f"{w['wheelmake']} {w['wheelmodel']}"
 frame_options = {frame_label(f): f["frameid"] for f in frames}
 frame_names_sorted = sorted(frame_options.keys())
 
+def get_frame_name(frame_id):
+    frame = frames_by_id.get(frame_id)
+    if frame:
+        return f"{frame['framemake']} {frame['framemodel']}"
+    return "Unknown Frame"
 
 def wheel_options_for_frame(frame_id):
     """Only show wheels that (a) actually have a bikes.json entry for this
@@ -183,13 +189,18 @@ if page != "Speed Calculator":
             else:
                 FRAMES.remove(f)
 
-        
+    frame_names = []
+    for f in FRAMES:
+        frame_names.append(get_frame_name(f))
 
-    st.info(
-        "Bike comparison — coming soon. The main aim is to recreate the ZI bike and wheel tests virtually"
+    df = (
+        pd.DataFrame({"Frame": frame_names, "Time Saved (s)": time_s})
+        .sort_values(by="Time Saved (s)", ascending=False)
+        .reset_index(drop=True)
     )
 
-    st.stop()
+    st.bar_chart(df, x='Time Saved (s)', y="Frame", horizontal=True)
+
 
 else:
     st.caption("Speed solved from the steady-state power balance: rolling resistance + aero drag + gravity. Data from zwifterbikes and underlying code inspired by zwifttools.")
