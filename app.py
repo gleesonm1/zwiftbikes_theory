@@ -181,13 +181,15 @@ if page != "Speed Calculator":
             FRAMES = tt_ids
 
         time_s = []
-        for f in FRAMES:
+        for f in FRAMES[:]:
             wopts = wheel_options_for_frame(f)
             if wopts:
-                t_s, _, _ = calc_time_to_distance(power, gradient, f, STANDARD_WHEEL_ID, level, h1, w1, bikes_by_key, crr, ZC_km)
+                t_s, _, _ = calc_time_to_distance(
+                    power, gradient, f, STANDARD_WHEEL_ID, level, h1, w1, bikes_by_key, crr, ZC_km
+                )
                 time_s.append(3600 - t_s)
             else:
-                FRAMES = FRAMES.remove(f)
+                FRAMES.remove(f)
 
         st.text(str(len(FRAMES)))
         st.text(str(len(time_s)))
