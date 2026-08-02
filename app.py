@@ -192,16 +192,13 @@ if page != "Speed Calculator":
             else:
                 FRAMES.remove(f)
 
-        st.text(str(len(FRAMES)))
-        st.text(str(len(time_s)))
-
     frame_names = []
     for f in FRAMES:
         frame_names.append(get_frame_name(f))
 
     df = (
         pd.DataFrame({"Frame": frame_names, "Time Saved (s)": time_s})
-        .sort_values(by="Time Saved (s)", ascending=False)
+        .sort_values(by="Time Saved (s)", ascending=True)
         .reset_index(drop=True)
     )
 
