@@ -1,0 +1,52 @@
+import numpy as np
+import requests
+
+# ---------------------------------------------------------------------------
+# Physics constants
+# ---------------------------------------------------------------------------
+AIR_DENSITY = 1.225        # kg/m^3 at sea level
+GRAVITY = 9.8067           # m/s^2
+DRIVETRAIN_LOSS = 0.025    # 2.5% drivetrain loss
+CRR_DEFAULT = 0.004        # road surface
+
+# ---------------------------------------------------------------------------
+# Physics helpers
+# ---------------------------------------------------------------------------
+def frontal_area_from_rider(height_m, weight_kg):
+    return 0.0293 * (height_m ** 0.725) * (weight_kg ** 0.425) + 0.0604
+
+
+def get_bike_wheel_data(frame_id, wheel_id, level, bikes_by_key):
+    entry = bikes_by_key.get((frame_id, wheel_id))
+    if entry is None:
+        return None, None
+    return entry["weight"][level], entry["cd"][level]
+
+
+def calc_speed(power_w, gradient, frame_id, wheel_id, level, height_cm, weight_kg,
+               bikes_by_key, crr):
+    """Returns (speed_kph, CdA, bike_weight_kg) or (None, CdA, bike_weight_kg)
+    if no equilibrium speed was found in range."""
+    height_m = height_cm / 100
+    FA = frontal_area_from_rider(height_m, weight_kg)
+    bike_kg, bike_cd = get_bike_wheel_data(frame_id, wheel_id, level, bikes_by_key)
+    if bike_kg is None:
+        return None, None, None
+
+    total_weight = weight_kg + bike_kg
+    CdA = FA * bike_cd
+
+    v = np.linspace(0.1, 30, 3000)
+    theta = np.arctan(gradient)
+    power_value = power_w * (1 - DRIVETRAIN_LOSS)
+    resistive = (v * crr * total_weight * GRAVITY * np.cos(theta) +
+                 0.5 * AIR_DENSITY * CdA * v ** 3 +
+                 v * total_weight * GRAVITY * np.sin(theta))
+    diff = power_value - resistive
+    sign_change = np.where(np.diff(np.sign(diff)))[0]
+    if len(sign_change) == 0:
+        return None, CdA, bike_kg
+
+    i = sign_change[0]
+    v_eq = np.interp(0, [diff[i], diff[i + 1]], [v[i], v[i + 1]])
+    return v_eq * 3.6, CdA, bike_kg

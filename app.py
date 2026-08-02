@@ -1,16 +1,20 @@
 import streamlit as st
 import numpy as np
 import requests
+from physics import physics
+from physics.physics import get_bike_wheel_data
+from physics.physics import frontal_area_from_rider
+from physics.physics import calc_speed
 
 st.set_page_config(page_title="Zwift Bike Speed Calculator", layout="wide")
 
 # ---------------------------------------------------------------------------
-# Physics constants (same as your original script)
+# Physics constants
 # ---------------------------------------------------------------------------
-AIR_DENSITY = 1.225        # kg/m^3 at sea level
-GRAVITY = 9.8067           # m/s^2
-DRIVETRAIN_LOSS = 0.025    # 2.5% drivetrain loss
-CRR_DEFAULT = 0.004        # road surface
+AIR_DENSITY = physics.AIR_DENSITY          # kg/m^3 at sea level
+GRAVITY = physics.GRAVITY                  # m/s^2
+DRIVETRAIN_LOSS = physics.DRIVETRAIN_LOSS  # 2.5% drivetrain loss
+CRR_DEFAULT = physics.CRR_DEFAULT          # road surface
 
 # Standard baseline bike used for "time saved vs stock" comparisons,
 # matching calc_time_diff_to_standard from your original script
@@ -22,7 +26,7 @@ LEVEL_LABELS = ["Level 0", "Level 1", "Level 2", "Level 3", "Level 4", "Level 5 
 
 
 # ---------------------------------------------------------------------------
-# Data loading (cached so we don't re-hit zwifterbikes.web.app every rerun)
+# Data loading (cached)
 # ---------------------------------------------------------------------------
 @st.cache_data(ttl=3600)
 def load_data():
@@ -42,49 +46,6 @@ def load_data():
 
 
 # ---------------------------------------------------------------------------
-# Physics helpers
-# ---------------------------------------------------------------------------
-def frontal_area_from_rider(height_m, weight_kg):
-    return 0.0293 * (height_m ** 0.725) * (weight_kg ** 0.425) + 0.0604
-
-
-def get_bike_wheel_data(frame_id, wheel_id, level, bikes_by_key):
-    entry = bikes_by_key.get((frame_id, wheel_id))
-    if entry is None:
-        return None, None
-    return entry["weight"][level], entry["cd"][level]
-
-
-def calc_speed(power_w, gradient, frame_id, wheel_id, level, height_cm, weight_kg,
-               bikes_by_key, crr):
-    """Returns (speed_kph, CdA, bike_weight_kg) or (None, CdA, bike_weight_kg)
-    if no equilibrium speed was found in range."""
-    height_m = height_cm / 100
-    FA = frontal_area_from_rider(height_m, weight_kg)
-    bike_kg, bike_cd = get_bike_wheel_data(frame_id, wheel_id, level, bikes_by_key)
-    if bike_kg is None:
-        return None, None, None
-
-    total_weight = weight_kg + bike_kg
-    CdA = FA * bike_cd
-
-    v = np.linspace(0.1, 30, 3000)
-    theta = np.arctan(gradient)
-    power_value = power_w * (1 - DRIVETRAIN_LOSS)
-    resistive = (v * crr * total_weight * GRAVITY * np.cos(theta) +
-                 0.5 * AIR_DENSITY * CdA * v ** 3 +
-                 v * total_weight * GRAVITY * np.sin(theta))
-    diff = power_value - resistive
-    sign_change = np.where(np.diff(np.sign(diff)))[0]
-    if len(sign_change) == 0:
-        return None, CdA, bike_kg
-
-    i = sign_change[0]
-    v_eq = np.interp(0, [diff[i], diff[i + 1]], [v[i], v[i + 1]])
-    return v_eq * 3.6, CdA, bike_kg
-
-
-# ---------------------------------------------------------------------------
 # Load data + build lookup structures
 # ---------------------------------------------------------------------------
 frames, wheels, bikes = load_data()
@@ -94,9 +55,9 @@ frames_by_id = {f["frameid"]: f for f in frames}
 wheels_by_id = {w["wheelid"]: w for w in wheels}
 bikes_by_key = {(b["frameid"], b["wheelid"]): b for b in bikes}
 
-# Display labels replicate the original UI's "Make Model (A:x W:x)" format
-frame_label = lambda f: f"{f['framemake']} {f['framemodel']} (A:{f['frameaero']} W:{f['frameweight']})"
-wheel_label = lambda w: f"{w['wheelmake']} {w['wheelmodel']} (A:{w['wheelaero']} W:{w['wheelweight']})"
+# Display labels
+frame_label = lambda f: f"{f['framemake']} {f['framemodel']}"
+wheel_label = lambda w: f"{w['wheelmake']} {w['wheelmodel']}"
 
 frame_options = {frame_label(f): f["frameid"] for f in frames}
 frame_names_sorted = sorted(frame_options.keys())
@@ -123,7 +84,7 @@ def wheel_options_for_frame(frame_id):
 # UI
 # ---------------------------------------------------------------------------
 st.title("🚴 Zwift Bike Speed Calculator")
-st.caption("Speed solved from the steady-state power balance: rolling resistance + aero drag + gravity.")
+st.caption("Speed solved from the steady-state power balance: rolling resistance + aero drag + gravity. Data from zwifterbikes and underlying code inspired by zwifttools.")
 
 top1, top2, top3 = st.columns(3)
 with top1:
