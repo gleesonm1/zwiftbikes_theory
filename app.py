@@ -189,6 +189,9 @@ if page != "Speed Calculator":
             else:
                 FRAMES.remove(f)
 
+        st.text(str(len(FRAMES)))
+        st.text(str(len(time_s)))
+
     frame_names = []
     for f in FRAMES:
         frame_names.append(get_frame_name(f))
