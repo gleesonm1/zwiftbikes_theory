@@ -2,9 +2,9 @@ import streamlit as st
 import numpy as np
 import requests
 from physics import physics
-from physics.physics import get_bike_wheel_data
-from physics.physics import frontal_area_from_rider
 from physics.physics import calc_speed
+from physics.physics import calc_distance
+from physics.physics import calc_time_to_distance
 
 st.set_page_config(page_title="Zwift Bike Speed Calculator", layout="wide")
 
@@ -144,8 +144,11 @@ if page != "Speed Calculator":
 
     with col2:
         st.subheader("Common Bike Comparisons")
+        st.caption("This compares your setup on the left to the performanc of the Zwift Carbon frame (level 0) with Zwift 32 mm Carbon wheels alongside other common frames (with standard Zwift 32 mm Carbon wheels) at a selected upgrade level.")
         level_label = st.selectbox("Upgrade Level", LEVEL_LABELS, index=5, key=f"b_level")
 
+        ZC_km = calc_distance(power, gradient, STANDARD_FRAME_ID, STANDARD_WHEEL_ID, STANDARD_LEVEL, h1, w1, bikes_by_key, crr, 3600)
+        st.print(ZC_km)
 
     st.info(
         "Bike comparison — coming soon. The main aim is to recreate the ZI bike"
