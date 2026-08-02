@@ -167,6 +167,7 @@ if page != "Speed Calculator":
         st.caption("NOTE - at the moment this is only set up to compare road or TT frames. If you're trying to compare gravel or mountain bike frames I'll add that in the future (along with automatic changes in Crr).")
         
         level_label = st.selectbox("Upgrade level for typical frame options", LEVEL_LABELS, index=5, key=f"b_level")
+        level = LEVEL_LABELS.index(level_label)
 
         if fr_type == "Standard":
             FRAMES = standard_ids
@@ -175,7 +176,7 @@ if page != "Speed Calculator":
 
         time_s = []
         for f in FRAMES:
-            t_s, _, _ = calc_time_to_distance(power, gradient, f, STANDARD_WHEEL_ID, level_label, h1, w1, bikes_by_key, crr, ZC_km)
+            t_s, _, _ = calc_time_to_distance(power, gradient, f, STANDARD_WHEEL_ID, level, h1, w1, bikes_by_key, crr, ZC_km)
             time_s.append(3600 - t_s)
 
         
