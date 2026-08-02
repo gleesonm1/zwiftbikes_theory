@@ -219,7 +219,7 @@ if page != "Speed Calculator":
     # Adjust height dynamically based on frame count so labels aren't squished
     fig.update_layout(height=max(400, len(frame_names) * 25), showlegend=False)
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 
 else:
