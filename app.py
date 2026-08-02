@@ -151,7 +151,7 @@ if page != "Speed Calculator":
         
         YOUR_SETUP_s, _, _ = calc_time_to_distance(power, gradient, frame1, wheel1, level1, h1, w1, bikes_by_key, crr, ZC_km)
 
-        st.text(f"Your set up covers the same distance in f{YOUR_SETUP_s} seconds, or {3600 - YOUR_SETUP_s} seconds faster than the standard level 0 Zwift Carbon.")
+        st.text(f"Your set up covers the same distance in {YOUR_SETUP_s:.0f} seconds, or {3600 - YOUR_SETUP_s:.0f} seconds faster than the standard level 0 Zwift Carbon.")
         level_label = st.selectbox("Upgrade Level", LEVEL_LABELS, index=5, key=f"b_level")
 
         
