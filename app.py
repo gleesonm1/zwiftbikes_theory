@@ -55,6 +55,11 @@ frames_by_id = {f["frameid"]: f for f in frames}
 wheels_by_id = {w["wheelid"]: w for w in wheels}
 bikes_by_key = {(b["frameid"], b["wheelid"]): b for b in bikes}
 
+standard_ids = [frame["frameid"] for frame in frames if frame.get("frametype") == "Standard"]
+gravel_ids = [frame["frameid"] for frame in frames if frame.get("frametype") == "Gravel"]
+mtb_ids = [frame["frameid"] for frame in frames if frame.get("frametype") == "MTB"]
+tt_ids = [frame["frameid"] for frame in frames if frame.get("frametype") == "TT"]
+
 # Display labels
 frame_label = lambda f: f"{f['framemake']} {f['framemodel']}"
 wheel_label = lambda w: f"{w['wheelmake']} {w['wheelmodel']}"
@@ -144,15 +149,34 @@ if page != "Speed Calculator":
 
     with col2:
         st.subheader("Common Bike Comparisons")
-        st.caption("This compares your setup on the left to the performanc of the Zwift Carbon frame (level 0) with Zwift 32 mm Carbon wheels alongside other common frames (with standard Zwift 32 mm Carbon wheels) at a selected upgrade level.")
-        
-        ZC_km, _, _ = calc_distance(power, gradient, STANDARD_FRAME_ID, STANDARD_WHEEL_ID, STANDARD_LEVEL, h1, w1, bikes_by_key, crr, 3600)
-        st.text(f"Distance covered in 1 hour on level 0 Zwift Carbon frame with Zwift 32 mm Carbon wheels: {ZC_km:.2f} km \nNow we will calculate the difference in the time required to travel the same distance for various other frames (i.e., time saved or lost compared to this standard set up).")
-        
-        YOUR_SETUP_s, _, _ = calc_time_to_distance(power, gradient, frame1, wheel1, level1, h1, w1, bikes_by_key, crr, ZC_km)
+        fr = next((f for f in frames if f["frameid"] == frame1), None)
+        fr_type = fr['frametype']
+        if fr_type == "Standard":
+            st.caption("This compares your setup on the left to the performanc of the Zwift Carbon frame (level 0) with Zwift 32 mm Carbon wheels alongside other common frames (with standard Zwift 32 mm Carbon wheels) at a selected upgrade level.")
+            ZC_km, _, _ = calc_distance(power, gradient, STANDARD_FRAME_ID, STANDARD_WHEEL_ID, STANDARD_LEVEL, h1, w1, bikes_by_key, crr, 3600)
+            st.text(f"Distance covered in 1 hour on level 0 Zwift Carbon frame with Zwift 32 mm Carbon wheels: {ZC_km:.2f} km \nNow we will calculate the difference in the time required to travel the same distance for various other frames (i.e., time saved or lost compared to this standard set up).")
+            YOUR_SETUP_s, _, _ = calc_time_to_distance(power, gradient, frame1, wheel1, level1, h1, w1, bikes_by_key, crr, ZC_km)
+            st.text(f"Your set up covers the same distance in {YOUR_SETUP_s:.0f} seconds, or {3600 - YOUR_SETUP_s:.0f} seconds faster than the standard level 0 Zwift Carbon.")
+        elif fr_type == "TT":
+            st.caption("This compares your setup on the left to the performanc of the Zwift TT frame (level 0) with Zwift 32 mm Carbon wheels alongside other common frames (with standard Zwift 32 mm Carbon wheels) at a selected upgrade level.")
+            ZC_km, _, _ = calc_distance(power, gradient, "F094", STANDARD_WHEEL_ID, STANDARD_LEVEL, h1, w1, bikes_by_key, crr, 3600)
+            st.text(f"Distance covered in 1 hour on level 0 Zwift TT frame with Zwift 32 mm Carbon wheels: {ZC_km:.2f} km \nNow we will calculate the difference in the time required to travel the same distance for various other frames (i.e., time saved or lost compared to this standard set up).")
+            YOUR_SETUP_s, _, _ = calc_time_to_distance(power, gradient, frame1, wheel1, level1, h1, w1, bikes_by_key, crr, ZC_km)
+            st.text(f"Your set up covers the same distance in {YOUR_SETUP_s:.0f} seconds, or {3600 - YOUR_SETUP_s:.0f} seconds faster than the standard level 0 Zwift TT.")
 
-        st.text(f"Your set up covers the same distance in {YOUR_SETUP_s:.0f} seconds, or {3600 - YOUR_SETUP_s:.0f} seconds faster than the standard level 0 Zwift Carbon.")
-        level_label = st.selectbox("Upgrade Level", LEVEL_LABELS, index=5, key=f"b_level")
+        st.caption("NOTE - at the moment this is only set up to compare road or TT frames. If you're trying to compare gravel or mountain bike frames I'll add that in the future (along with automatic changes in Crr).")
+        
+        level_label = st.selectbox("Upgrade level for typical frame options", LEVEL_LABELS, index=5, key=f"b_level")
+
+        if fr_type == "Standard":
+            FRAMES = standard_ids
+        elif fr_type == "TT":
+            FRAMES = tt_ids
+
+        time_s = []
+        for f in FRAMES:
+            t_s, _, _ = calc_time_to_distance(power, gradient, f, STANDARD_WHEEL_ID, level_label, h1, w1, bikes_by_key, crr, ZC_km)
+            time_s.append(3600 - t_s)
 
         
 
