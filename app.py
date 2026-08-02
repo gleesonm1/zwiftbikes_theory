@@ -137,7 +137,7 @@ if page != "Speed Calculator":
 
     gradient = gradient_pct / 100.0
 
-    col1 = st.columns(1)
+    col1, col2 = st.columns(2)
     frame1, wheel1, level1, h1, w1 = bike_panel(
         col1, "Your setup", "a", "F086", "W057"  # Zwift Aero + ENVE SES 4.5 PRO
     )
