@@ -177,7 +177,7 @@ if page != "Speed Calculator":
         time_s = []
         for f in FRAMES:
             t_s, _, _ = calc_time_to_distance(power, gradient, f, STANDARD_WHEEL_ID, level, h1, w1, bikes_by_key, crr, ZC_km)
-            time_s.append(3600 - t_s)
+            time_s.append(t_s)
 
         
 
