@@ -13,6 +13,8 @@ CRR_DEFAULT = 0.004        # road surface
 # Physics helpers
 # ---------------------------------------------------------------------------
 def frontal_area_from_rider(height_m, weight_kg):
+    """Uses Faria formula
+    Returns estimated frontal area in m2."""
     return 0.0293 * (height_m ** 0.725) * (weight_kg ** 0.425) + 0.0604
 
 
