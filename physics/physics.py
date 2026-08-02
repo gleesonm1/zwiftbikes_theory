@@ -50,3 +50,16 @@ def calc_speed(power_w, gradient, frame_id, wheel_id, level, height_cm, weight_k
     i = sign_change[0]
     v_eq = np.interp(0, [diff[i], diff[i + 1]], [v[i], v[i + 1]])
     return v_eq * 3.6, CdA, bike_kg
+
+def calc_distance(power_w, gradient, frame_id, wheel_id, level, height_cm, weight_kg, bikes_by_key, crr, time_s):
+    """Returns (distance (km), CdA, bike_weight_kg)"""
+    v_kph, CdA, bike_kg = calc_speed(power_w, gradient, frame_id, wheel_id, level, height_cm, weight_kg, bikes_by_key, crr)
+    distance_km = v_kph*(time_s/(60*60))
+    return distance_km, CdA, bike_kg
+
+def calc_time_to_distance(power_w, gradient, frame_id, wheel_id, level, height_cm, weight_kg, bikes_by_key, crr, distance_km):
+    """Returns (time (s) to specified distance, CdA, bike_weight_kg)"""
+    v_kph, CdA, bike_kg = calc_speed(power_w, gradient, frame_id, wheel_id, level, height_cm, weight_kg, bikes_by_key, crr)
+    time_hr = distance_km/v_kph
+    return time_hr*(60*60), CdA, bike_kg
+

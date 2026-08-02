@@ -84,97 +84,112 @@ def wheel_options_for_frame(frame_id):
 # UI
 # ---------------------------------------------------------------------------
 st.title("🚴 Zwift Bike Speed Calculator")
-st.caption("Speed solved from the steady-state power balance: rolling resistance + aero drag + gravity. Data from zwifterbikes and underlying code inspired by zwifttools.")
 
-top1, top2, top3 = st.columns(3)
-with top1:
-    power = st.slider("Power (W)", 100, 500, 250, step=5)
-with top2:
-    gradient_pct = st.slider("Gradient (%)", -10.0, 15.0, 0.0, step=0.5)
-with top3:
-    crr = st.number_input("Crr", min_value=0.001, max_value=0.010, value=CRR_DEFAULT, step=0.0005, format="%.4f")
-
-gradient = gradient_pct / 100.0
-
-
-def bike_panel(col, label, key_prefix, default_frame_id, default_wheel_id):
-    with col:
-        st.subheader(label)
-
-        frame_name = st.selectbox(
-            "Frame", frame_names_sorted,
-            index=frame_names_sorted.index(frame_label(frames_by_id[default_frame_id])),
-            key=f"{key_prefix}_frame",
-        )
-        frame_id = frame_options[frame_name]
-        frame = frames_by_id[frame_id]
-
-        wopts = wheel_options_for_frame(frame_id)
-        if not wopts:
-            st.info("This frame has fixed wheels — no wheel selection needed.")
-            wheel_id = ""
-        else:
-            wheel_names_sorted = sorted(wopts.keys())
-            default_wheel_name = wheel_label(wheels_by_id[default_wheel_id]) if default_wheel_id in wheels_by_id else None
-            default_idx = wheel_names_sorted.index(default_wheel_name) if default_wheel_name in wheel_names_sorted else 0
-            wheel_name = st.selectbox("Wheels", wheel_names_sorted, index=default_idx, key=f"{key_prefix}_wheel")
-            wheel_id = wopts[wheel_name]
-
-        level_label = st.selectbox("Upgrade Level", LEVEL_LABELS, index=5, key=f"{key_prefix}_level")
-        level = LEVEL_LABELS.index(level_label)
-
-        c1, c2 = st.columns(2)
-        with c1:
-            height = st.number_input("Height (cm)", 140, 210, 175, key=f"{key_prefix}_height")
-        with c2:
-            weight = st.number_input("Weight (kg)", 40, 120, 75, key=f"{key_prefix}_weight")
-
-        return frame_id, wheel_id, level, height, weight
-
-
-col1, col2 = st.columns(2)
-frame1, wheel1, level1, h1, w1 = bike_panel(
-    col1, "Setup A", "a", "F086", "W057"  # Zwift Aero + ENVE SES 4.5 PRO
-)
-frame2, wheel2, level2, h2, w2 = bike_panel(
-    col2, "Setup B", "b", "F061", "W066"  # Specialized Aethos + Princeton Wake 6560 Lava
+page = st.radio(
+    "Page", ["Speed Calculator", "Bike Comparison (recreating zwift insider tests!)"],
+    horizontal=True, label_visibility="collapsed",
 )
 
-speed1, cda1, bw1 = calc_speed(power, gradient, frame1, wheel1, level1, h1, w1, bikes_by_key, crr)
-speed2, cda2, bw2 = calc_speed(power, gradient, frame2, wheel2, level2, h2, w2, bikes_by_key, crr)
+if page != "Speed Calculator":
+    st.info(
+        "Bike comparison — coming soon. The main aim is to recreate the ZI bike"
+        "and wheel tests virtually"
+    )
 
-std_speed1, _, _ = calc_speed(power, gradient, STANDARD_FRAME_ID, STANDARD_WHEEL_ID, STANDARD_LEVEL, h1, w1, bikes_by_key, crr)
-std_speed2, _, _ = calc_speed(power, gradient, STANDARD_FRAME_ID, STANDARD_WHEEL_ID, STANDARD_LEVEL, h2, w2, bikes_by_key, crr)
+    st.stop()
 
-st.divider()
-res1, res2 = st.columns(2)
+else:
+    st.caption("Speed solved from the steady-state power balance: rolling resistance + aero drag + gravity. Data from zwifterbikes and underlying code inspired by zwifttools.")
 
-with res1:
-    if speed1 is not None:
-        st.metric("Speed — Setup A", f"{speed1:.2f} km/h")
-        st.caption(f"CdA: {cda1:.4f} m² · Bike weight: {bw1:.2f} kg")
-        if std_speed1:
-            secs_per_km = 3600 * (1 / speed1 - 1 / std_speed1)
-            st.caption(f"{'−' if secs_per_km < 0 else '+'}{abs(secs_per_km):.1f} sec/km vs stock Zwift Carbon")
-    else:
-        st.error("No equilibrium speed found for Setup A in this power/gradient range.")
+    top1, top2, top3 = st.columns(3)
+    with top1:
+        power = st.slider("Power (W)", 100, 500, 250, step=5)
+    with top2:
+        gradient_pct = st.slider("Gradient (%)", -10.0, 15.0, 0.0, step=0.5)
+    with top3:
+        crr = st.number_input("Crr", min_value=0.001, max_value=0.010, value=CRR_DEFAULT, step=0.0005, format="%.4f")
 
-with res2:
-    if speed2 is not None:
-        st.metric("Speed — Setup B", f"{speed2:.2f} km/h")
-        st.caption(f"CdA: {cda2:.4f} m² · Bike weight: {bw2:.2f} kg")
-        if std_speed2:
-            secs_per_km = 3600 * (1 / speed2 - 1 / std_speed2)
-            st.caption(f"{'−' if secs_per_km < 0 else '+'}{abs(secs_per_km):.1f} sec/km vs stock Zwift Carbon")
-    else:
-        st.error("No equilibrium speed found for Setup B in this power/gradient range.")
+    gradient = gradient_pct / 100.0
 
-if speed1 is not None and speed2 is not None:
+
+    def bike_panel(col, label, key_prefix, default_frame_id, default_wheel_id):
+        with col:
+            st.subheader(label)
+
+            frame_name = st.selectbox(
+                "Frame", frame_names_sorted,
+                index=frame_names_sorted.index(frame_label(frames_by_id[default_frame_id])),
+                key=f"{key_prefix}_frame",
+            )
+            frame_id = frame_options[frame_name]
+            frame = frames_by_id[frame_id]
+
+            wopts = wheel_options_for_frame(frame_id)
+            if not wopts:
+                st.info("This frame has fixed wheels — no wheel selection needed.")
+                wheel_id = ""
+            else:
+                wheel_names_sorted = sorted(wopts.keys())
+                default_wheel_name = wheel_label(wheels_by_id[default_wheel_id]) if default_wheel_id in wheels_by_id else None
+                default_idx = wheel_names_sorted.index(default_wheel_name) if default_wheel_name in wheel_names_sorted else 0
+                wheel_name = st.selectbox("Wheels", wheel_names_sorted, index=default_idx, key=f"{key_prefix}_wheel")
+                wheel_id = wopts[wheel_name]
+
+            level_label = st.selectbox("Upgrade Level", LEVEL_LABELS, index=5, key=f"{key_prefix}_level")
+            level = LEVEL_LABELS.index(level_label)
+
+            c1, c2 = st.columns(2)
+            with c1:
+                height = st.number_input("Height (cm)", 140, 210, 175, key=f"{key_prefix}_height")
+            with c2:
+                weight = st.number_input("Weight (kg)", 40, 120, 75, key=f"{key_prefix}_weight")
+
+            return frame_id, wheel_id, level, height, weight
+
+
+    col1, col2 = st.columns(2)
+    frame1, wheel1, level1, h1, w1 = bike_panel(
+        col1, "Setup A", "a", "F086", "W057"  # Zwift Aero + ENVE SES 4.5 PRO
+    )
+    frame2, wheel2, level2, h2, w2 = bike_panel(
+        col2, "Setup B", "b", "F061", "W066"  # Specialized Aethos + Princeton Wake 6560 Lava
+    )
+
+    speed1, cda1, bw1 = calc_speed(power, gradient, frame1, wheel1, level1, h1, w1, bikes_by_key, crr)
+    speed2, cda2, bw2 = calc_speed(power, gradient, frame2, wheel2, level2, h2, w2, bikes_by_key, crr)
+
+    std_speed1, _, _ = calc_speed(power, gradient, STANDARD_FRAME_ID, STANDARD_WHEEL_ID, STANDARD_LEVEL, h1, w1, bikes_by_key, crr)
+    std_speed2, _, _ = calc_speed(power, gradient, STANDARD_FRAME_ID, STANDARD_WHEEL_ID, STANDARD_LEVEL, h2, w2, bikes_by_key, crr)
+
     st.divider()
-    diff = speed2 - speed1
-    if abs(diff) < 0.005:
-        st.info("Setup A and Setup B are essentially identical at this power and gradient.")
-    elif diff > 0:
-        st.success(f"Setup B is **{diff:.2f} km/h faster** than Setup A at {power}W on a {gradient_pct:.1f}% grade.")
-    else:
-        st.success(f"Setup A is **{abs(diff):.2f} km/h faster** than Setup B at {power}W on a {gradient_pct:.1f}% grade.")
+    res1, res2 = st.columns(2)
+
+    with res1:
+        if speed1 is not None:
+            st.metric("Speed — Setup A", f"{speed1:.2f} km/h")
+            st.caption(f"CdA: {cda1:.4f} m² · Bike weight: {bw1:.2f} kg")
+            if std_speed1:
+                secs_per_km = 3600 * (1 / speed1 - 1 / std_speed1)
+                st.caption(f"{'−' if secs_per_km < 0 else '+'}{abs(secs_per_km):.1f} sec/km vs stock Zwift Carbon")
+        else:
+            st.error("No equilibrium speed found for Setup A in this power/gradient range.")
+
+    with res2:
+        if speed2 is not None:
+            st.metric("Speed — Setup B", f"{speed2:.2f} km/h")
+            st.caption(f"CdA: {cda2:.4f} m² · Bike weight: {bw2:.2f} kg")
+            if std_speed2:
+                secs_per_km = 3600 * (1 / speed2 - 1 / std_speed2)
+                st.caption(f"{'−' if secs_per_km < 0 else '+'}{abs(secs_per_km):.1f} sec/km vs stock Zwift Carbon")
+        else:
+            st.error("No equilibrium speed found for Setup B in this power/gradient range.")
+
+    if speed1 is not None and speed2 is not None:
+        st.divider()
+        diff = speed2 - speed1
+        if abs(diff) < 0.005:
+            st.info("Setup A and Setup B are essentially identical at this power and gradient.")
+        elif diff > 0:
+            st.success(f"Setup B is **{diff:.2f} km/h faster** than Setup A at {power}W on a {gradient_pct:.1f}% grade.")
+        else:
+            st.success(f"Setup A is **{abs(diff):.2f} km/h faster** than Setup B at {power}W on a {gradient_pct:.1f}% grade.")
