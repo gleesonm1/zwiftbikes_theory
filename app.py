@@ -137,39 +137,10 @@ if page != "Speed Calculator":
 
     gradient = gradient_pct / 100.0
 
-    # def bike_panel(col, label, key_prefix, default_frame_id, default_wheel_id):
-    #     with col:
-    #         st.subheader(label)
-
-    #         frame_name = st.selectbox(
-    #             "Frame", frame_names_sorted,
-    #             index=frame_names_sorted.index(frame_label(frames_by_id[default_frame_id])),
-    #             key=f"{key_prefix}_frame",
-    #         )
-    #         frame_id = frame_options[frame_name]
-    #         frame = frames_by_id[frame_id]
-
-    #         wopts = wheel_options_for_frame(frame_id)
-    #         if not wopts:
-    #             st.info("This frame has fixed wheels — no wheel selection needed.")
-    #             wheel_id = ""
-    #         else:
-    #             wheel_names_sorted = sorted(wopts.keys())
-    #             default_wheel_name = wheel_label(wheels_by_id[default_wheel_id]) if default_wheel_id in wheels_by_id else None
-    #             default_idx = wheel_names_sorted.index(default_wheel_name) if default_wheel_name in wheel_names_sorted else 0
-    #             wheel_name = st.selectbox("Wheels", wheel_names_sorted, index=default_idx, key=f"{key_prefix}_wheel")
-    #             wheel_id = wopts[wheel_name]
-
-    #         level_label = st.selectbox("Upgrade Level", LEVEL_LABELS, index=5, key=f"{key_prefix}_level")
-    #         level = LEVEL_LABELS.index(level_label)
-
-    #         c1, c2 = st.columns(2)
-    #         with c1:
-    #             height = st.number_input("Height (cm)", 140, 210, 175, key=f"{key_prefix}_height")
-    #         with c2:
-    #             weight = st.number_input("Weight (kg)", 40, 120, 75, key=f"{key_prefix}_weight")
-
-    #         return frame_id, wheel_id, level, height, weight
+    col1 = st.columns(1)
+    frame1, wheel1, level1, h1, w1 = bike_panel(
+        col1, "Your setup", "a", "F086", "W057"  # Zwift Aero + ENVE SES 4.5 PRO
+    )
 
     st.info(
         "Bike comparison — coming soon. The main aim is to recreate the ZI bike"
@@ -190,42 +161,6 @@ else:
         crr = st.number_input("Crr", min_value=0.001, max_value=0.010, value=CRR_DEFAULT, step=0.0005, format="%.4f")
 
     gradient = gradient_pct / 100.0
-
-
-    # def bike_panel(col, label, key_prefix, default_frame_id, default_wheel_id):
-    #     with col:
-    #         st.subheader(label)
-
-    #         frame_name = st.selectbox(
-    #             "Frame", frame_names_sorted,
-    #             index=frame_names_sorted.index(frame_label(frames_by_id[default_frame_id])),
-    #             key=f"{key_prefix}_frame",
-    #         )
-    #         frame_id = frame_options[frame_name]
-    #         frame = frames_by_id[frame_id]
-
-    #         wopts = wheel_options_for_frame(frame_id)
-    #         if not wopts:
-    #             st.info("This frame has fixed wheels — no wheel selection needed.")
-    #             wheel_id = ""
-    #         else:
-    #             wheel_names_sorted = sorted(wopts.keys())
-    #             default_wheel_name = wheel_label(wheels_by_id[default_wheel_id]) if default_wheel_id in wheels_by_id else None
-    #             default_idx = wheel_names_sorted.index(default_wheel_name) if default_wheel_name in wheel_names_sorted else 0
-    #             wheel_name = st.selectbox("Wheels", wheel_names_sorted, index=default_idx, key=f"{key_prefix}_wheel")
-    #             wheel_id = wopts[wheel_name]
-
-    #         level_label = st.selectbox("Upgrade Level", LEVEL_LABELS, index=5, key=f"{key_prefix}_level")
-    #         level = LEVEL_LABELS.index(level_label)
-
-    #         c1, c2 = st.columns(2)
-    #         with c1:
-    #             height = st.number_input("Height (cm)", 140, 210, 175, key=f"{key_prefix}_height")
-    #         with c2:
-    #             weight = st.number_input("Weight (kg)", 40, 120, 75, key=f"{key_prefix}_weight")
-
-    #         return frame_id, wheel_id, level, height, weight
-
 
     col1, col2 = st.columns(2)
     frame1, wheel1, level1, h1, w1 = bike_panel(
