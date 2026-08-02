@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+import plotly.express as px
 import requests
 from physics import physics
 from physics.physics import calc_speed
@@ -204,7 +205,21 @@ if page != "Speed Calculator":
         .reset_index(drop=True)
     )
 
-    st.bar_chart(df, x='Time Saved (s)', y="Frame", horizontal=True)
+    fig = px.bar(
+        df,
+        x="Time Saved (s)",
+        y="Frame",
+        orientation="h",
+        title="Time Saved vs Standard Setup over 1 Hour",
+        labels={"Time Saved (s)": "Time Saved (seconds)", "Frame": "Frame Model"},
+        color="Time Saved (s)",
+        color_continuous_scale="Viridis",
+    )
+
+    # Adjust height dynamically based on frame count so labels aren't squished
+    fig.update_layout(height=max(400, len(frame_names) * 25), showlegend=False)
+
+    st.plotly_chart(fig, use_container_width=True)
 
 
 else:
