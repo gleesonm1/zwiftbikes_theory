@@ -196,6 +196,9 @@ if page != "Speed Calculator":
     for f in FRAMES:
         frame_names.append(get_frame_name(f))
 
+    frame_names.append(f"Your setup: {frame1} and {wheel1}")
+    time_s.append(3600 - YOUR_SETUP_s)
+
     df = (
         pd.DataFrame({"Frame": frame_names, "Time Saved (s)": time_s})
         .sort_values(by="Time Saved (s)", ascending=True)
