@@ -142,6 +142,10 @@ if page != "Speed Calculator":
         col1, "Your setup", "a", "F086", "W057"  # Zwift Aero + ENVE SES 4.5 PRO
     )
 
+    with col2:
+        st.title("Common Bike Comparisons")
+
+
     st.info(
         "Bike comparison — coming soon. The main aim is to recreate the ZI bike"
         "and wheel tests virtually"
