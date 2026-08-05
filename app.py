@@ -7,6 +7,7 @@ from physics import physics
 from physics.physics import calc_speed
 from physics.physics import calc_distance
 from physics.physics import calc_time_to_distance
+from physics.physics import crr_values
 
 st.set_page_config(page_title="Zwift Bike Speed Calculator", layout="wide")
 
